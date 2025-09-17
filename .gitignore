@@ -1,0 +1,10 @@
+__pycache__/
+.vscode/
+
+*.log
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tiff
