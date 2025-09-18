@@ -1,3 +1,6 @@
 [submodule "lerobot"]
 	path = lerobot
 	url = https://github.com/huggingface/lerobot.git
+[submodule "chessboard/elephantfish"]
+	path = chessboard/elephantfish
+	url = https://github.com/bupticybee/elephantfish
