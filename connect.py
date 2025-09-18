@@ -1,3 +1,4 @@
+# Description: 控制机械臂demo
 import sys
 import os
 from pynput import keyboard

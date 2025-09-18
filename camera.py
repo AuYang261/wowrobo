@@ -1,4 +1,5 @@
 # -- coding: utf-8 --
+# Description: 连接相机获取RGB+Depth图像demo
 import threading
 import msvcrt
 import ctypes
@@ -339,8 +340,16 @@ def work_thread(camera=0):
                     cv2.imwrite("Depth.png", image)
                 else:
                     cv2.imwrite("RGB.png", image)
+                    # 锐化
+                    kernel = np.array(
+                        [[-1, -1.5, -1], [-1.5, 11, -1.5], [-1, -1.5, -1]],
+                        np.float32,
+                    )
+                    image = cv2.filter2D(image, -1, kernel=kernel)
+                    cv2.imwrite("RGB_Sharpen.png", image)
         else:
             print("no data[0x%x]" % ret)
+        time.sleep(0.1)
 
 
 if __name__ == "__main__":
