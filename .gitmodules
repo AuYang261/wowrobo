@@ -1,3 +1,6 @@
 [submodule "lerobot"]
 	path = lerobot
 	url = https://github.com/huggingface/lerobot.git
+[submodule "chessboard/chinese_chess/MyChess"]
+	path = chessboard/chinese_chess/MyChess
+	url = https://github.com/mm12432/MyChess.git

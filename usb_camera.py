@@ -1,4 +1,4 @@
-# Description: 控制usb相机，并通过鼠标点击选择棋盘格的四个角点
+# Description: 控制usb相机，并通过鼠标点击标定棋盘格的四个角点
 import cv2
 import numpy as np
 import os
@@ -118,16 +118,21 @@ def main():
     width, height = frame.shape[1], frame.shape[0]
     # 将角点往外扩展几个像素
     padding = 30
-    POINTS[0] = (max(POINTS[0][0] - padding, 0), max(POINTS[0][1] - padding, 0))
-    POINTS[1] = (min(POINTS[1][0] + padding, width), max(POINTS[1][1] - padding, 0))
-    POINTS[2] = (max(POINTS[2][0] + padding, 0), min(POINTS[2][1] + padding, height))
-    POINTS[3] = (
+    POINTS_PADDED = []
+    POINTS_PADDED.append(max(POINTS[0][0] - padding, 0), max(POINTS[0][1] - padding, 0))
+    POINTS_PADDED.append(
+        min(POINTS[1][0] + padding, width), max(POINTS[1][1] - padding, 0)
+    )
+    POINTS_PADDED.append(
+        max(POINTS[2][0] + padding, 0), min(POINTS[2][1] + padding, height)
+    )
+    POINTS_PADDED.append(
         min(POINTS[3][0] - padding, width),
         min(POINTS[3][1] + padding, height),
     )
-    print(f"Padded points: {POINTS}")
+    print(f"Padded points: {POINTS_PADDED}")
     # 根据4角点计算仿射变换矩阵
-    pts1 = np.float32(POINTS)
+    pts1 = np.float32(POINTS_PADDED)
     pts2 = np.float32([(0, 0), (width, 0), (width, height), (0, height)])
     M = cv2.getPerspectiveTransform(pts1, pts2)
 
