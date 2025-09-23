@@ -1,6 +1,7 @@
 __pycache__/
 .vscode/
 calibration/
+dataset/
 
 *.log
 *.png

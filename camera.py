@@ -1,5 +1,5 @@
 # -- coding: utf-8 --
-# Description: 连接相机获取RGB+Depth图像demo
+# Description: 连接海康相机获取RGB+Depth图像demo
 import threading
 import msvcrt
 import ctypes
