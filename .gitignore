@@ -2,6 +2,8 @@ __pycache__/
 .vscode/
 calibration/
 dataset/
+runs/
+yolov11/
 
 *.log
 *.png
