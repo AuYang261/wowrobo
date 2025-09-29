@@ -3,7 +3,9 @@ import sys
 import os
 from pynput import keyboard
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "lerobot/src/"))
+sys.path.append(
+    os.path.join(os.path.dirname(os.path.dirname(__file__)), "lerobot", "src")
+)
 from lerobot.motors.dynamixel import DynamixelMotorsBus
 from lerobot.motors import Motor, MotorCalibration, MotorNormMode
 from lerobot.model.kinematics import RobotKinematics
@@ -17,7 +19,7 @@ import threading
 # print(pose)
 
 leader_left_port = "COM14"
-follower_left_port = "COM15"
+follower_left_port = "COM3"
 
 norm_mode_body = MotorNormMode.DEGREES
 leader_arm_left = DynamixelMotorsBus(

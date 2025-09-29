@@ -1,5 +1,28 @@
 # WOWROBO 机械臂+深度相机项目
 
+## 机械臂坐标定义
+
+以最下面的多级为原点，红色为X轴，绿色为Y轴，蓝色为Z轴。
+
+![alt text](docs/image1.png)
+
+## 机械臂标定
+
+运行以下命令进行机械臂标定，`--robot.port`参数根据实际情况修改为机械臂连接的串口号，`--robot.calibration_dir`参数指定标定数据保存的目录。
+
+```bash
+python lerobot\src\lerobot\calibrate.py --robot.type koch_follower --robot.port COM3 --robot.id koch_follower --robot.calibration_dir calibration/
+```
+
+缺什么库装什么库。如果报错找不到lerobot，需要在calibrate.py中前面添加：
+
+```python
+import sys
+import os
+
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+```
+
 ## 步骤
 
 ### 数据收集
