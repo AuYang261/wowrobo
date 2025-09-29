@@ -30,7 +30,7 @@ def get_4_corners(cap):
                 POINTS.pop()
 
     # 创建窗口并绑定鼠标回调函数
-    window_name = "USB Camera"
+    window_name = "Camera"
     cv2.namedWindow(window_name)
     cv2.setMouseCallback(window_name, mouse_callback)
 

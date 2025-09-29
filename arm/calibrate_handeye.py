@@ -6,14 +6,9 @@ from matplotlib.transforms import Transform
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from camera.orb_camera import open_camera, get_frames, close_camera
-from arm.arm_control import (
-    connect_arm,
-    set_arm_angles,
-    get_read_arm_angles,
-    disconnect_arm,
-)
+from arm.arm_control import Arm
 import cv2
-import xlrd2
+import xlrd2, xlwt
 from math import cos, sin, pi
 import numpy as np
 import kinpy
@@ -50,7 +45,7 @@ class Calibration:
         R = Rz @ Ry @ Rx
         return R
 
-    # 末端位姿的旋转和平移矩阵
+    # 末端位姿的旋转和平移矩阵，角度单位为度，位移单位为mm
     @staticmethod
     def gripper2base(x, y, z, tx, ty, tz):
         thetaX = x / 180 * pi
@@ -182,7 +177,7 @@ def forward_kinematics(
 
 
 goal_angles = [0, 0, 0, 0, 0]
-offset = [0, -40, -40, -50, 0]
+goal_gripper_angle = 80
 
 
 def on_press(key):
@@ -224,9 +219,13 @@ def get_input():
 
 # 收集图片和位姿数据，生成图片和excel文件
 def collect_image_pose():
-    global goal_angles
+    global goal_angles, goal_gripper_angle
     image_path = os.path.join(os.path.dirname(__file__), "hand-eye-data", "images/")
     pose_path = os.path.join(os.path.dirname(__file__), "hand-eye-data", "pose.xlsx")
+    if not os.path.exists(os.path.dirname(image_path)):
+        os.makedirs(os.path.dirname(image_path))
+    if not os.path.exists(os.path.dirname(pose_path)):
+        os.makedirs(os.path.dirname(pose_path))
 
     chain = read_urdf(
         open(
@@ -242,23 +241,60 @@ def collect_image_pose():
             )
         ).read()
     )
-    arm = connect_arm("COM3")
+    arm = Arm("COM3")
+    arm.disable_torque()
     time.sleep(1)
-    set_arm_angles(
-        arm,
-        [goal_angles[i] + offset[i] for i in range(len(goal_angles))],
-        gripper_angle=80,
-    )
-    time.sleep(0.5)
-    angles, gripper = get_read_arm_angles(arm)
-    # 读取的角度会有几度的误差，暂时用goal_angles更好看，正运动学结果也更稳定
-    # 真正手眼标定时要用实际读取的角度
-    print("机械臂角度:", goal_angles, "夹爪状态:", gripper)
-    end_pose = forward_kinematics(chain=chain, joint_angles=goal_angles)
-    print("夹爪位置:", end_pose.pos)
-    print("夹爪旋转矩阵:\n", end_pose.rot_mat)
-    disconnect_arm(arm)
-    # cam = open_camera(color=True, depth=False)
+    data = xlwt.Workbook()
+    table = data.add_sheet("pose")
+    rows_num = 0
+    cam = open_camera(color=True, depth=False)
+    while True:
+        try:
+            # arm.set_arm_angles(
+            #     [goal_angles[i] for i in range(len(goal_angles))],
+            #     gripper_angle=goal_gripper_angle,
+            # )
+            angles, gripper = arm.get_read_arm_angles()
+            if angles is None:
+                print("获取机械臂角度失败")
+                continue
+            print("机械臂角度:", angles, "夹爪状态:", gripper)
+            end_pose = forward_kinematics(chain=chain, joint_angles=angles)
+            print("夹爪位置:", end_pose.pos)
+            print("夹爪旋转矩阵:\n", end_pose.rot_mat)
+
+            frames = get_frames(cam)
+            color_image = frames.get("color")
+            if color_image is None:
+                print("failed to get color image")
+                continue
+            cv2.imshow("Color Viewer", color_image)
+            key = cv2.waitKey(1)
+            if key == 27:
+                break
+            elif key == ord(" "):
+                cv2.imwrite(f"{image_path}/{time.time()}.png", color_image)
+                new_row = [
+                    end_pose.pos[0],
+                    end_pose.pos[1],
+                    end_pose.pos[2],
+                    end_pose.rot_euler[0],
+                    end_pose.rot_euler[1],
+                    end_pose.rot_euler[2],
+                ]
+                for i in range(len(new_row)):
+                    table.write(rows_num, i, new_row[i])
+                rows_num += 1
+            # elif key == ord("g"):
+            #     goal_gripper_angle = 0 if goal_gripper_angle == 80 else 80
+            #     arm.set_arm_angles(goal_angles, goal_gripper_angle)
+            #     print("夹爪状态:", goal_gripper_angle)
+        except KeyboardInterrupt:
+            break
+    data.save(pose_path)
+    cv2.destroyAllWindows()
+    close_camera(cam)
+    arm.disconnect_arm()
 
     return image_path, pose_path
 
