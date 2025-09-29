@@ -4,7 +4,3 @@
 [submodule "chessboard/chinese_chess/MyChess"]
 	path = chessboard/chinese_chess/MyChess
 	url = https://github.com/mm12432/MyChess.git
-[submodule "low_cost_robot"]
-	path = low_cost_robot
-	url = https://github.com/tc-huang/low_cost_robot.git
-	branch = feature/URDF
